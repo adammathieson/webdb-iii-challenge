@@ -18,8 +18,9 @@ router.get('/:id', (req, res) => {
     const studentId = req.params.id;
 
     db('students')
-        .where({ id: studentId })
-        .first()
+        .join('cohorts', 'students.cohort_id', '=', 'cohorts.id')
+        .select('students.id', 'students.name', 'cohorts.name as cohort')
+        .where('students.id', req.params.id)
         .then(student => {
             if(!student) {
                 res.status(400).json({ message: 'The student with the specified ID does not exist.' })
@@ -34,7 +35,7 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
     const { name, cohort_id } = req.body;
     if(!name || !cohort_id) {
-        res.status(406).json({ message: 'Please provide a name and id to add a student'})
+        res.status(406).json({ message: 'Please provide a name and id to add a student.' })
     }
     db('students')
         .insert({ 
